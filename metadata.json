@@ -1,0 +1,6 @@
+{
+  "name": "TaskFlow WebMCP & A2UI",
+  "description": "Next-generation intelligent Todo app demonstrating WebMCP tool execution, A2UI generative interface cards, and multi-model chat (Gemini, LM Studio, Ollama).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
