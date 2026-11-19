@@ -1,4 +1,60 @@
+---
+title: Beyond AI Chatbots: Building Agent-Driven Applications with MCP, WebMCP and A2UI
+theme: light
+resolution: 1920x1080
+fps: 30
+---
+
 # Beyond AI Chatbots: Building Agent-Driven Applications with MCP, WebMCP and A2UI
+
+## 🌐 The web is not just for humans anymore!
+
+<!-- fragment -->
+> The internet was originally built for humans. We designed buttons, dropdowns, and forms for people to read, understand, and use.
+But now there’s a new type of user emerging: **`AI agents` 🤖.** Soon they’ll be able to complete registrations, buy tickets, and take any action needed to complete a goal on a website.
+
+<!-- fragment -->
+> They must crawl websites and reverse-engineer how everything works.
+For example, to book a flight, an agent needs to identify the right input fields, guess the correct data format, and hope nothing breaks in the process. It’s inefficient. ⏳
+
+<!-- fragment -->
+
+## 🤔 What can we do about this?
+
+<!-- fragment -->
+> We can use the **MCPs** standard which will solve this issue by exposing the structure of these tools so AI agents can understand and perform better. 🚀
+
+> We can use the **Generative UIs** standard which will solve this issue by exposing UI components so AI agents can understand and perform better. 🚀
+
+
+---
+
+# 👋 WHOAMI
+
+<!-- columns: 2 -->
+
+**Just a guy figuring things out and not afraid to show my mess or my beautiful solutions. 💡**
+
+**My name is Alex Muturi 👨‍💻**
+
+You can find me on:
+- 🐦 Twitter / X: [@MuturiAlex](https://x.com/MuturiAlex)
+- 💼 LinkedIn: [Alex Muturi](https://linkedin.com/in/alex-muturi)
+- 🌐 Blog: [alex-migwi.github.io](https://alex-migwi.github.io)
+- 🐙 GitHub: [alex-migwi](https://github.com/alex-migwi)
+- 📝 Medium: [alex-migwi.medium.com](https://alex-migwi.medium.com)
+
+**🅰️ I also write Angular stuff on [angularrecipes.dev](https://angularrecipes.dev)**
+
+<!-- col-break -->
+
+<img src="./talk-assets/Alex M J.jpeg" alt="Alex Muturi J." width="auto">
+
+> Note: Welcome everyone! Today we're diving into WebMCP—the Web Model Context Protocol—and exploring how it transforms web application testing from brittle UI scripts into self-healing, autonomous AI agent workflows.
+
+---
+
+# What does the future beyond just chat bots look like?
 
 Most AI applications still behave like chatbots: users type a request, the model returns text, and the application does very little with the result.
 
@@ -11,18 +67,16 @@ MCP allows applications to expose tools and data to agents. WebMCP brings those 
 * A2UI allows the agent to generate a contextual interface for the user.
 * The host application retains control over components, permissions, validation and execution.
 
----
+## The new approach: Generative UI or radically adaptive UI
 
-# The new approach: Generative UI or radically adaptive UI
-
-## What if the pre-built persona we usually design for, the made-up average user, quietly changes in this scenario?
+### What if the pre-built persona we usually design for, the made-up average user, quietly changes in this scenario?
 
 <!--fragment -->
 > <strong>Generative UI is not only a UI shift but also a huge UX shift.</strong> 
 
-</br>
+---
 
-## What does A2UI have to do with all of this?
+# What does Generative-UI or A2UI have to do with all of this?
 
 ### In standard apps, human engineers write strict, static code for every view. 
 
@@ -83,9 +137,31 @@ Your app maps abstract components to your design system. "Button" becomes your b
 
 # 1. The Core Philosophy: "Recipes, Not Code"
 
-### AI can: call tools/execute code via WebMCP or MCP and also generate code. 
+## AI can: call tools/execute code via WebMCP or MCP and also generate code.
 
-### But with A2UI...
+### 💡 Why WebMCP and MCP?
+
+`WebMCP` and `MCP` help you:
+
+```text
+- 🌉 Bridge the gap between web applications and agents
+- ⚡ Improve efficiency
+- 🛡️ Improve reliability
+- 🎯 Improve task completion
+
+by providing rules for interaction.
+```
+<!-- fragment -->
+```text
+- 🧩 Instead of an agent reviewing an element, such as a button or field, to understand its purpose, the website declares the element's purpose so it's used correctly.
+- 🧩 Instead of creating an for every `API` a API resource declares tools accessed via `MCP` defining the resource purpose so it's used correctly.
+- 🎯 This is more reliable than actuation or gueswork or repeated integrations, which may have numerous steps and leaves each step open to interpretation by the agent.
+```
+> The `WebMCP` and `MCP` standards provide a way to build and expose structured tools for AI agents. It allows them to understand and interact with web pages more reliably, improving efficiency and task completion. Instead of guessing how elements work, agents can use the provided information to act with confidence. ✨
+
+---
+
+# But with A2UI in addtion to MCP's...
 
 > <strong>the AI never generates or sends code (HTML, CSS, JavaScript) to the client application.</strong>
 
@@ -104,6 +180,17 @@ Instead, the AI agent outputs a structured recipe (a JSON data object) describin
 <!-- fragment -->
 
 > `A2UI` renders beautiful UIs on its own but we add the `MCP` and `WebMCP` for component intelligence, validation, and enterprise-grade reliability.   
+
+---
+
+# Todays vs Tomorrows chat bots
+
+<img src="./talk-assets/1_3ETS1hYkSVWdrasmGtBSJQ.webp" width="auto" height="auto"/>
+---
+
+# What's the big picture?
+
+<img src="./talk-assets/1_QMlFF7T7Jm_BYAqEDSMvyA.webp" width="auto" height="auto">
 
 ---
 
@@ -300,19 +387,20 @@ With A2UI:
 <!-- fragment -->
 3. Hybrid Power: It bridges the conversational flexibility of generative AI with the fast, predictable interactions of classic graphical interfaces (GUI).
 
----
+</br>
 
-# The Paradigm Shift: Standard Apps vs. A2UI
+<!-- fragment -->
+## The Paradigm Shift: Standard Apps vs. A2UI
 To understand A2UI, contrast it with how you normally build applications:
 
 <!-- columns: 2 col -->
-## The Old Way (Static UI)
+### The Old Way (Static UI)
 In a traditional TypeScript/React/Vue app, you (the human developer) anticipate every single screen. 
 * You write the layout, you hardcode the forms, you set up the specific router paths, and you deploy it. 
 * The UI is rigid ie. if a user wants to do something you didn't code a screen for, they simply can't do it.
 
 <!-- col-break -->
-## The A2UI Way (Generative UI)
+### The A2UI Way (Generative UI)
 In an A2UI app, you don't build pages. Instead, you build a LEGO set (The Catalog) and hand the instruction manual to the AI Agent.
 
 * You build a generic Card component, a generic Button component, and a generic InputField.
@@ -389,3 +477,193 @@ Here is exactly how your success scenario looks in a normalized A2UI Flat Bluepr
 * Easy Generation: The LLM can easily generate one block at a time without losing track of indentation levels.
 <!-- fragment -->
 * Immediate Streaming UI: As soon as the LLM finishes outputting the text for "success_message", your client engine can immediately draw it on the screen, even while the LLM is still typing out the "confirm_button" configuration!
+
+<!-- fragment -->
+* Unlike traditional nested JSON trees, A2UI uses an adjacency list model—components are stored as a flat list with ID references. This design choice makes A2UI protocol particularly LLM-friendly.
+
+<!-- column: 2 -->
+### Traditional nested approach:
+* Requires perfect nesting in one pass
+* Difficult to update deeply nested components
+* Hard to stream incrementally
+
+<!-- col-break -->
+### A2UI adjacency list:
+
+✅ Flat structure, easy for LLMs to generate
+✅ Send components incrementally—A2UI supports progressive rendering
+✅ Update any component by ID—A2UI protocol enables efficient updates
+✅ Clear separation of structure and data—A2UI architecture promotes clean design
+
+---
+
+# Now that you have an adaptive UI like A2UI
+
+You say, “I want a room in New York in March,” and it shows you the interface you need. For example, a calendar for the dates, prices visible in case you are flexible.
+
+A stepper for the guests. If you had asked what hotels are available instead, it would show a list with photos and prices.
+
+For the user it is simply this: I ask, and I get exactly the screen I need. Nothing else.
+
+The interesting question is what happens between the asking and the screen, and where we step in, for us designing this experience
+
+<img src="./talk-assets/1_iFkHqeBqPBT4urJl9PcuvQ.webp" width="auto">
+
+---
+
+# The model can only recommend components that exist in the catalog.
+
+It does not invent a date picker, and it does not generate a random one-off widget.
+
+A2UI checks the recipe against the catalog before it is sent and catches any property the model tried to make up.
+
+The app checks it again on arrival. No more generic…well, you name it.
+
+So “it cannot invent” is not a hopeful promise.
+
+The agent generates, a validator checks it against your catalog, and it self-corrects before anything reaches the screen.
+
+</br>
+
+<img src="./talk-assets/1_Fd5UBC9fvAFu9RHPqacBhQ.webp" width="auto">
+
+---
+
+## Standard MCP client: Create, then Complete
+
+```mermaid
+  sequenceDiagram
+    participant Client as MCP client
+    participant Server as server.ts /mcp
+    participant Executor as executeDirectTool
+    participant Store as Server-side todoStore
+    participant UI as Open browser UI
+
+    Client->>Server: tools/call create_todo(title: "123")
+    Server->>Executor: execute create_todo
+    Executor->>Store: add todo
+    Store-->>Server: todo + generated ID
+    Server-->>Client: tool result with generated ID
+
+    Client->>Server: tools/call complete_todo(id)
+    Server->>Executor: execute complete_todo
+    Executor->>Store: toggle completion
+    Store-->>Server: updated todo
+    Server-->>Client: tool result
+
+    Note over Store,UI: No connection to browser LocalStorage or UI updates
+```
+---
+
+# UI Chat: Create, then Complete
+
+```mermaid
+  sequenceDiagram
+    actor User
+    participant Chat as ChatPanel
+    participant API as /api/chat
+    participant Model as Gemini
+    participant App as App / MainCanvas
+    participant Executor as executeDirectTool
+    participant Store as Browser todoStore
+    participant Local as LocalStorage
+    participant Board as TodoView
+
+    User->>Chat: "Create task 123"
+    Chat->>API: sendProviderMessage(prompt, current todos)
+    API->>Model: Prompt + tool definitions
+    Model-->>API: draft_task_form(title: "123")
+    API-->>Chat: Return first tool call
+    Chat->>Executor: Execute draft_task_form
+    Executor-->>App: Return form prefill
+    App-->>User: Show prefilled task form
+
+    User->>App: Review and click Save
+    App->>Store: todoStore.add(...)
+    Store->>Local: Save todos
+    Store-->>App: Notify active subscribers
+    App-->>User: Navigate back to task board
+    Board->>Store: Subscribe and read current todos
+    Store-->>Board: Current todos, including new task
+    Board-->>User: Render new task
+
+    User->>Chat: "Mark [generated task ID] complete"
+    Chat->>API: Send completion request
+    API->>Model: Prompt + current todos + tool definitions
+    Model-->>API: complete_todo(id)
+    API-->>Chat: Return first tool call
+    Chat->>Executor: Execute complete_todo
+    Executor->>Store: toggleComplete(id)
+    Store->>Local: Save updated todos
+    Store-->>Board: Notify subscribers
+    Board-->>User: Render task as completed
+```
+
+---
+
+## Direct UI actions: create and complete
+
+```mermaid
+  sequenceDiagram
+    actor User
+    participant UI as App / MainCanvas
+    participant Form as CreateTodoView
+    participant Item as TodoListItem
+    participant Board as TodoView
+    participant Store as Browser todoStore
+    participant Local as LocalStorage
+
+    User->>UI: Click "New Task"
+    UI->>Form: Navigate to create view
+    User->>Form: Fill title "123" and click Save
+    Form->>Store: todoStore.add(...)
+    Store->>Local: Save todos
+    Form-->>UI: Show saved state, then navigate to board
+    UI->>Board: Mount TodoView
+    Board->>Store: Subscribe and read current todos
+    Store-->>Board: Current todos
+    Board-->>User: Render task "123"
+
+    User->>Item: Click task checkbox
+    Item->>Board: onToggle(task ID)
+    Board->>Store: todoStore.toggleComplete(id)
+    Store->>Local: Save updated todos
+    Store-->>Board: Notify subscribers
+    Board-->>User: Re-render task as completed
+```
+
+---
+
+# Demo Time
+
+## Lets see a A2UI Driven React APP that uses WebMCP and MCP as well.
+
+<!-- columns: 2 -->
+
+## Scan QR to go the Repo
+<img src="./talk-assets/3xtt652n-qr.png" width="auto" height="auto"/>
+
+<!-- col-break -->
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+
+## [https://github.com/alex-migwi/beyond-chat-with-webmcp-mcp-a2ui](https://github.com/alex-migwi/beyond-chat-with-webmcp-mcp-a2ui)
+
+
+
+
+---
+
+
+# Questions
+
+</br></br>
+<!-- fragment -->
+
+# Thank you for showing up.
