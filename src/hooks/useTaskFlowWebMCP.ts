@@ -10,10 +10,10 @@ interface UseTaskFlowWebMCPProps {
 }
 
 /**
- * Production WebMCP Integration Hook.
- * Registers all canonical tools directly into W3C standard `window.document.modelContext`.
+ * WebMCP Integration Hook.
+ * Registers all canonical tools into the browser's `document.modelContext` (WebMCP draft API, provided via the @mcp-b polyfill).
  * When invoked by an in-browser agent or extension, tools execute directly against the store
- * with zero middleman switch layers.
+ * (or the A2UI engine for declarative surfaces) with zero middleman layers.
  */
 export function useTaskFlowWebMCP({
   onDraftTaskForm,
@@ -29,30 +29,45 @@ export function useTaskFlowWebMCP({
     description: draftDef.description,
     inputSchema: draftDef.parameters as any,
     execute: async (args: any) => {
-      const { result, surface } = await executeDirectTool('draft_task_form', args);
-      if (onDraftTaskForm && 'prefill' in result && result.prefill) {
+      const { result } = await executeDirectTool('draft_task_form', args);
+      if (onDraftTaskForm && result.prefill) {
         onDraftTaskForm(result.prefill);
       }
-      return { success: true, surface, result };
+      return result;
     },
   });
 
-  // 2. show_canvas_surface (A2UI Navigation tool)
+  // 2. show_canvas_surface (Canvas navigation)
   const showDef = getTool('show_canvas_surface');
   useWebMCP({
     name: showDef.name,
     description: showDef.description,
     inputSchema: showDef.parameters as any,
     execute: async (args: any) => {
-      const { result, surface } = await executeDirectTool('show_canvas_surface', args);
-      if (onNavigateCanvas && args.surface) {
-        onNavigateCanvas(args.surface);
+      const { result, canvasView } = await executeDirectTool('show_canvas_surface', args);
+      if (onNavigateCanvas) {
+        onNavigateCanvas(canvasView);
       }
-      return { success: true, surface, result };
+      return result;
     },
   });
 
-  // 3. get_todos (Query active or completed tasks)
+  // 3. render_a2ui_surface (Agent-composed declarative A2UI tree)
+  const renderDef = getTool('render_a2ui_surface');
+  useWebMCP({
+    name: renderDef.name,
+    description: renderDef.description,
+    inputSchema: renderDef.parameters as any,
+    execute: async (args: any) => {
+      const { result, canvasView } = await executeDirectTool('render_a2ui_surface', args);
+      if (result.success && onNavigateCanvas) {
+        onNavigateCanvas(canvasView);
+      }
+      return result;
+    },
+  });
+
+  // 4. get_todos (Query active or completed tasks)
   const getDef = getTool('get_todos');
   useWebMCP({
     name: getDef.name,
@@ -64,7 +79,7 @@ export function useTaskFlowWebMCP({
     },
   });
 
-  // 4. create_todo (Save new task)
+  // 5. create_todo (Save new task)
   const createDef = getTool('create_todo');
   useWebMCP({
     name: createDef.name,
@@ -76,7 +91,7 @@ export function useTaskFlowWebMCP({
     },
   });
 
-  // 5. complete_todo (Toggle completion status)
+  // 6. complete_todo (Toggle completion status)
   const completeDef = getTool('complete_todo');
   useWebMCP({
     name: completeDef.name,
@@ -88,7 +103,7 @@ export function useTaskFlowWebMCP({
     },
   });
 
-  // 6. update_todo (Mutate task properties)
+  // 7. update_todo (Mutate task properties)
   const updateDef = getTool('update_todo');
   useWebMCP({
     name: updateDef.name,
@@ -100,7 +115,7 @@ export function useTaskFlowWebMCP({
     },
   });
 
-  // 7. delete_todo (Remove task)
+  // 8. delete_todo (Remove task)
   const deleteDef = getTool('delete_todo');
   useWebMCP({
     name: deleteDef.name,
@@ -112,7 +127,7 @@ export function useTaskFlowWebMCP({
     },
   });
 
-  // 8. clear_completed (Bulk cleanup)
+  // 9. clear_completed (Bulk cleanup)
   const clearDef = getTool('clear_completed');
   useWebMCP({
     name: clearDef.name,
@@ -124,33 +139,32 @@ export function useTaskFlowWebMCP({
     },
   });
 
-  // 9. update_subtask (Update or toggle subtask status)
+  // 10. update_subtask (Update or toggle subtask status)
   const updateSubtaskDef = getTool('update_subtask');
   useWebMCP({
     name: updateSubtaskDef.name,
     description: updateSubtaskDef.description,
     inputSchema: updateSubtaskDef.parameters as any,
     execute: async (args: any) => {
-      const { result, surface } = await executeDirectTool('update_subtask', args);
-      return { success: true, surface, result };
+      const { result } = await executeDirectTool('update_subtask', args);
+      return result;
     },
   });
 
-  // 10. open_task_detail (Open task detail screen on canvas)
+  // 11. open_task_detail (Open task detail screen on canvas)
   const openDetailDef = getTool('open_task_detail');
   useWebMCP({
     name: openDetailDef.name,
     description: openDetailDef.description,
     inputSchema: openDetailDef.parameters as any,
     execute: async (args: any) => {
-      const { result, surface } = await executeDirectTool('open_task_detail', args);
-      const taskId = 'selectedTaskId' in result ? result.selectedTaskId : undefined;
+      const { result } = await executeDirectTool('open_task_detail', args);
       if (onOpenTaskDetail) {
-        onOpenTaskDetail(taskId);
+        onOpenTaskDetail(result.selectedTaskId);
       } else if (onNavigateCanvas) {
         onNavigateCanvas('detail');
       }
-      return { success: true, surface, result };
+      return result;
     },
   });
 }

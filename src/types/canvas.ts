@@ -1,5 +1,4 @@
 import { Priority } from './todo';
-import { A2UISurfacePayload } from '../lib/a2ui-flow';
 
 export type CanvasView =
   | 'kanban'
@@ -7,7 +6,8 @@ export type CanvasView =
   | 'create'
   | 'focus'
   | 'inspector'
-  | 'detail';
+  | 'detail'
+  | 'a2ui';
 
 export interface FormPrefillData {
   title?: string;
@@ -23,5 +23,4 @@ export interface CanvasState {
   selectedTaskId?: string;
   source?: 'user' | 'agent';
   formPrefill?: FormPrefillData;
-  a2uiSurface?: A2UISurfacePayload;
 }

@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { Todo, Priority } from '../../types/todo';
 import { todoStore } from '../../lib/store';
-import { telemetry } from '../../lib/telemetry';
 import { CanvasView } from '../../types/canvas';
 
 interface FocusViewProps {
@@ -62,12 +61,6 @@ export const FocusView: React.FC<FocusViewProps> = ({
 
   const handleToggle = (id: string) => {
     todoStore.toggleComplete(id);
-    telemetry.log({
-      phase: 'WEBMCP_EXEC',
-      method: 'focus/toggle',
-      details: `Completed focus task via Canvas Focus Mode`,
-      data: { id },
-    });
   };
 
   const formatTimer = (secs: number) => {

@@ -110,7 +110,7 @@ console.table(tools.map(t => ({ name: t.name, description: t.description })));`;
           {activeTab === 'console' && (
             <div className="space-y-4">
               <p className="text-slate-600 dark:text-slate-300">
-                Because this application runs standard W3C WebMCP (via <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded font-mono">@mcp-b/global</code> and <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded font-mono">@mcp-b/react-webmcp</code>), the browser window itself exposes live tools to browser agents.
+                Because this application exposes the WebMCP draft API (via <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded font-mono">@mcp-b/global</code> and <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded font-mono">@mcp-b/react-webmcp</code>), the browser window itself exposes live tools to browser agents.
               </p>
 
               <div className="space-y-2">
@@ -164,7 +164,7 @@ console.table(tools.map(t => ({ name: t.name, description: t.description })));`;
                   <strong>Direct Execution Engine:</strong> Tools mutate the workspace store directly with zero middleman switch layers.
                 </li>
                 <li>
-                  <strong>W3C Standard Registration:</strong> Uses the <code className="font-mono text-[11px] bg-slate-100 dark:bg-slate-800 px-1 rounded">useWebMCP()</code> hook to register tools directly into <code className="font-mono text-[11px] bg-slate-100 dark:bg-slate-800 px-1 rounded">document.modelContext</code>.
+                  <strong>WebMCP Draft Registration:</strong> Uses the <code className="font-mono text-[11px] bg-slate-100 dark:bg-slate-800 px-1 rounded">useWebMCP()</code> hook to register tools into <code className="font-mono text-[11px] bg-slate-100 dark:bg-slate-800 px-1 rounded">document.modelContext</code> (WebMCP is a W3C Community Group draft, wired up here via the @mcp-b polyfill).
                 </li>
                 <li>
                   <strong>A2UI Validation Pipeline:</strong> Validates agent surface payloads against the official component catalog before mounting on the canvas.
@@ -209,7 +209,7 @@ console.table(tools.map(t => ({ name: t.name, description: t.description })));`;
         {/* Modal Footer */}
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex justify-between items-center">
           <span className="text-[11px] text-slate-500 font-mono">
-            spec: W3C Model Context Protocol 1.0
+            spec: WebMCP (W3C CG draft) via @mcp-b + MCP local relay
           </span>
           <button
             onClick={onClose}

@@ -6,7 +6,8 @@ export interface McpLogEntry {
     | 'AGENT_CALL'
     | 'WEBMCP_EXEC'
     | 'STORE_SYNC'
-    | 'A2UI_SYNTHESIS';
+    | 'A2UI_SYNTHESIS'
+    | 'A2UI_ACTION';
   method: string;
   details: string;
   data?: any;

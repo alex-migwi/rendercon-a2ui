@@ -20,17 +20,20 @@ export interface ProviderResponse {
 export interface ProviderConfig {
   provider: ModelProvider;
   lmStudioUrl: string;
+  lmStudioModel: string;
   ollamaUrl: string;
   ollamaModel: string;
 }
 
-const SYSTEM_INSTRUCTION_BASE = `You are TaskFlow Copilot, an AI assistant built on the W3C Web Model Context Protocol (WebMCP) and Agent-to-User Interface (A2UI) standard.
+const SYSTEM_INSTRUCTION_BASE = `You are TaskFlow Copilot, an AI assistant built on the Web Model Context Protocol (WebMCP, a W3C Community Group draft) and the A2UI (Agent-to-User Interface) v0.9 protocol.
 Your primary capabilities:
 - When user asks to create or draft a task: call draft_task_form with title, description, priority, category, dueDate, and subtasks.
 - When user asks to open or inspect a task: call open_task_detail with id or title.
 - When user asks to update a subtask or checklist: call update_subtask with todoId, subtaskId, and completed or title.
 - When user asks to navigate: call show_canvas_surface with surface ("kanban", "summary", "focus", "inspector", "detail").
 - When user asks to mutate tasks: call get_todos, create_todo, complete_todo, update_todo, delete_todo, or clear_completed.
+- When user asks for a custom view, report, dashboard, or matrix: call render_a2ui_surface and compose the declarative component tree yourself (see the tool description for the component vocabulary).
+- When you receive an [A2UI surface interaction] message, the user clicked a Button in a surface you previously rendered; respond by calling the tool named in the action, passing the context object as arguments.
 Keep answers concise and helpful.`;
 
 /**
@@ -88,6 +91,7 @@ export async function sendProviderMessage(
 
       const targetUrl = `${config.lmStudioUrl.replace(/\/+$/, '')}/chat/completions`;
       const payload = {
+        model: config.lmStudioModel || 'local-model',
         messages: [
           { role: 'system', content: fullSystemPrompt },
           ...recentHistory.map((h) => ({ role: h.role, content: h.content })),

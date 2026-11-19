@@ -183,7 +183,7 @@ class TodoStore {
   }): Todo {
     const newTodo: Todo = {
       id: `todo-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-      title: data.title.trim(),
+      title: (data.title || 'Untitled Task').trim(),
       description: data.description?.trim(),
       completed: false,
       status: 'pending',

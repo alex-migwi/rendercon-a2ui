@@ -1,29 +1,21 @@
 import { todoStore } from './store';
 import { telemetry } from './telemetry';
-import { synthesizeAgentA2UISurface, A2UISurfacePayload } from './a2ui-flow';
+import { renderA2UISurface } from './a2ui-engine';
 import { Todo } from '../types/todo';
-import { FormPrefillData } from '../types/canvas';
-
-export type ToolResult =
-  | { success: true; action: 'MOUNT_FORM_ON_CANVAS'; prefill: FormPrefillData }
-  | { success: true; surface: string; focusCategory?: string }
-  | { count: number; todos: Todo[] }
-  | { success: boolean; todo?: Todo | null }
-  | { success: boolean; clearedCount?: number }
-  | { success: boolean; todoId?: string; subtaskId?: string; todo?: Todo | null }
-  | { success: boolean; todo?: Todo | null; selectedTaskId?: string }
-  | { error: string };
+import { CanvasView, FormPrefillData } from '../types/canvas';
 
 export interface ToolExecutionResponse {
-  result: ToolResult;
-  surface: A2UISurfacePayload;
+  result: any;
+  /** Canvas view this tool execution renders on the main surface. */
+  canvasView: CanvasView;
+  formPrefill?: FormPrefillData;
+  selectedTaskId?: string;
 }
 
 /**
  * Direct Execution Engine for WebMCP Tools.
- * Production pattern: Executes tool directly against the store, records telemetry,
- * and synthesizes a validated A2UI surface for the client canvas.
- * Zero middleman switch layers or pseudo-relays.
+ * Executes tools directly against the store (or the A2UI engine), records
+ * telemetry, and reports which canvas view the result renders on.
  */
 export async function executeDirectTool(
   toolName: string,
@@ -40,30 +32,47 @@ export async function executeDirectTool(
   });
 
   let result: any = null;
+  let canvasView: CanvasView = 'kanban';
+  let formPrefill: FormPrefillData | undefined;
+  let selectedTaskId: string | undefined;
 
   switch (toolName) {
     case 'draft_task_form': {
-      result = {
-        success: true,
-        action: 'MOUNT_FORM_ON_CANVAS',
-        prefill: {
-          title: args.title || 'New Task',
-          description: args.description || '',
-          priority: args.priority || 'medium',
-          category: args.category || 'Work',
-          dueDate: args.dueDate || 'Today, 5:00 PM',
-          subtasks: Array.isArray(args.subtasks) ? args.subtasks : [],
-        },
+      formPrefill = {
+        title: args.title || 'New Task',
+        description: args.description || '',
+        priority: args.priority || 'medium',
+        category: args.category || 'Work',
+        dueDate: args.dueDate || 'Today, 5:00 PM',
+        subtasks: Array.isArray(args.subtasks) ? args.subtasks : [],
       };
+      canvasView = 'create';
+      result = { success: true, action: 'MOUNT_FORM_ON_CANVAS', prefill: formPrefill };
       break;
     }
 
     case 'show_canvas_surface': {
-      result = {
-        success: true,
-        surface: args.surface || 'kanban',
-        focusCategory: args.focusCategory,
-      };
+      const surface = args.surface || 'kanban';
+      canvasView =
+        surface === 'summary' || surface === 'focus' || surface === 'inspector' || surface === 'detail'
+          ? surface
+          : 'kanban';
+      result = { success: true, surface, focusCategory: args.focusCategory };
+      break;
+    }
+
+    case 'render_a2ui_surface': {
+      const render = renderA2UISurface({
+        title: args.title,
+        components: args.components,
+        data: args.data,
+      });
+      if ('surfaceId' in render) {
+        canvasView = 'a2ui';
+        result = { success: true, surfaceId: render.surfaceId, componentCount: render.componentCount };
+      } else {
+        result = { success: false, errors: render.errors };
+      }
       break;
     }
 
@@ -111,14 +120,55 @@ export async function executeDirectTool(
     }
 
     case 'update_subtask': {
-      const updated = todoStore.updateSubtask(args.todoId, args.subtaskId, {
-        title: args.title,
-        completed: args.completed,
-      });
+      let todoId = args.todoId;
+      let subtaskId = args.subtaskId;
+
+      // Resilience: if todoId wasn't provided or didn't match, search across all todos
+      if (!todoId) {
+        const allTodos = todoStore.getAll();
+        for (const t of allTodos) {
+          if (
+            t.subtasks?.some(
+              (s) =>
+                s.id === subtaskId ||
+                s.title.toLowerCase() === String(subtaskId || '').toLowerCase()
+            )
+          ) {
+            todoId = t.id;
+            break;
+          }
+        }
+      }
+
+      // Resilience: if subtaskId was given as a title rather than ID
+      if (todoId) {
+        const target = todoStore.getById(todoId);
+        if (target?.subtasks) {
+          const matchedSub = target.subtasks.find(
+            (s) =>
+              s.id === subtaskId ||
+              s.title.toLowerCase() === String(subtaskId || '').toLowerCase()
+          );
+          if (matchedSub) {
+            subtaskId = matchedSub.id;
+          }
+        }
+      }
+
+      const updated =
+        todoId && subtaskId
+          ? todoStore.updateSubtask(todoId, subtaskId, {
+              title: args.title,
+              completed: args.completed,
+            })
+          : null;
+
+      canvasView = 'detail';
+      selectedTaskId = todoId;
       result = {
         success: !!updated,
-        todoId: args.todoId,
-        subtaskId: args.subtaskId,
+        todoId: todoId || args.todoId,
+        subtaskId: subtaskId || args.subtaskId,
         todo: updated,
       };
       break;
@@ -136,6 +186,8 @@ export async function executeDirectTool(
       if (!targetTodo && todoStore.getAll().length > 0) {
         targetTodo = todoStore.getAll()[0];
       }
+      canvasView = 'detail';
+      selectedTaskId = targetTodo?.id;
       result = {
         success: !!targetTodo,
         todo: targetTodo,
@@ -158,8 +210,5 @@ export async function executeDirectTool(
     durationMs,
   });
 
-  // Synthesize and validate the A2UI surface for this tool operation
-  const surface = synthesizeAgentA2UISurface(toolName, args, result, userPrompt);
-
-  return { result, surface };
+  return { result, canvasView, formPrefill, selectedTaskId };
 }

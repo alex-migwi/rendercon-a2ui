@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { Priority } from '../../types/todo';
 import { todoStore } from '../../lib/store';
-import { telemetry } from '../../lib/telemetry';
 import { CanvasView, FormPrefillData } from '../../types/canvas';
 
 interface CreateTodoViewProps {
@@ -64,20 +63,13 @@ export const CreateTodoView: React.FC<CreateTodoViewProps> = ({
     e.preventDefault();
     if (!title.trim()) return;
 
-    const newTodo = todoStore.add({
+    todoStore.add({
       title: title.trim(),
       description: description.trim() || undefined,
       priority,
       category,
       dueDate,
       subtasks: subtasks.length > 0 ? subtasks : undefined,
-    });
-
-    telemetry.log({
-      phase: 'WEBMCP_EXEC',
-      method: 'canvas/create_todo',
-      details: `Created new task "${newTodo.title}" via Main Canvas form`,
-      data: { todo: newTodo },
     });
 
     setIsSaved(true);

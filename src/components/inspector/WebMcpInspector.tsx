@@ -54,6 +54,8 @@ export const WebMcpInspector: React.FC<WebMcpInspectorProps> = ({ onClose }) => 
         return 'bg-teal-100 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 border-teal-200';
       case 'A2UI_SYNTHESIS':
         return 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200';
+      case 'A2UI_ACTION':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-950/60 dark:text-orange-300 border-orange-200';
     }
   };
 
@@ -293,6 +295,7 @@ export const WebMcpInspector: React.FC<WebMcpInspectorProps> = ({ onClose }) => 
               { id: 'WEBMCP_EXEC', label: 'WebMCP Exec' },
               { id: 'STORE_SYNC', label: 'Store Sync' },
               { id: 'A2UI_SYNTHESIS', label: 'A2UI Synthesis' },
+              { id: 'A2UI_ACTION', label: 'A2UI Action' },
             ].map((p) => (
               <button
                 key={p.id}

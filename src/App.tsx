@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CheckSquare,
   Bot,
@@ -11,9 +11,8 @@ import { MainCanvas } from './components/canvas/MainCanvas';
 import { ChatPanel } from './components/chat/ChatPanel';
 import { DesktopClientModal } from './components/desktop/DesktopClientModal';
 import { CanvasView, CanvasState, FormPrefillData } from './types/canvas';
-import { A2UISurfacePayload } from './lib/a2ui-flow';
 import { useTaskFlowWebMCP } from './hooks/useTaskFlowWebMCP';
-import { A2UIProvider } from '@a2ui/react';
+import { onA2UIAction } from './lib/a2ui-engine';
 
 export default function App() {
   const [canvasState, setCanvasState] = useState<CanvasState>({
@@ -39,13 +38,12 @@ export default function App() {
     view: CanvasView,
     source: 'user' | 'agent' = 'user',
     formPrefill?: FormPrefillData,
-    a2uiSurface?: A2UISurfacePayload,
     selectedTaskId?: string
   ) => {
-    setCanvasState({ view, source, formPrefill, a2uiSurface, selectedTaskId });
+    setCanvasState({ view, source, formPrefill, selectedTaskId });
   };
 
-  // Register tools into W3C standard document.modelContext using official @mcp-b/react-webmcp hook
+  // Register tools into document.modelContext (WebMCP draft API) via the @mcp-b/react-webmcp hook
   useTaskFlowWebMCP({
     onDraftTaskForm: (prefill) => {
       handleNavigateCanvas('create', 'agent', prefill);
@@ -54,7 +52,7 @@ export default function App() {
       handleNavigateCanvas(surface as CanvasView, 'agent');
     },
     onOpenTaskDetail: (todoId) => {
-      handleNavigateCanvas('detail', 'agent', undefined, undefined, todoId);
+      handleNavigateCanvas('detail', 'agent', undefined, todoId);
     },
   });
 
@@ -63,13 +61,26 @@ export default function App() {
     setMobileTab('chat');
   };
 
+  // A2UI protocol loop: actions dispatched from agent-rendered surfaces
+  // (e.g. Button clicks) flow back to the agent through the chat panel.
+  useEffect(() => {
+    return onA2UIAction((action) => {
+      const context =
+        action.context && Object.keys(action.context).length > 0
+          ? ` with context ${JSON.stringify(action.context)}`
+          : '';
+      handlePromptFromCanvas(
+        `[A2UI surface interaction] The user triggered the "${action.name}" action${context}. Handle this interaction by calling the appropriate tool.`
+      );
+    });
+  }, []);
+
   return (
-    <A2UIProvider>
-      <div
-        className={`min-h-screen flex flex-col font-sans ${
-          isDarkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
-        }`}
-      >
+    <div
+      className={`h-[100dvh] min-h-0 overflow-hidden flex flex-col font-sans ${
+        isDarkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
+      }`}
+    >
         {/* Top Navbar */}
         <header className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-4 flex items-center justify-between z-30 shrink-0">
           <div className="flex items-center gap-3">
@@ -164,7 +175,7 @@ export default function App() {
         </header>
 
         {/* Mobile Tab Switcher */}
-        <div className="sm:hidden flex border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <div className="sm:hidden flex shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <button
             onClick={() => setMobileTab('canvas')}
             className={`flex-1 py-2 text-xs font-semibold text-center border-b-2 transition ${
@@ -189,17 +200,17 @@ export default function App() {
         </div>
 
         {/* Main Split Layout: Left Canvas Surface + Right Chat Sidebar */}
-        <main className="flex-1 flex overflow-hidden relative">
+        <main className="flex-1 min-h-0 flex overflow-hidden relative">
           {/* Left Pane: Main Dynamic A2UI Canvas */}
           <div
-            className={`flex-1 flex flex-col min-w-0 ${
-              mobileTab === 'canvas' ? 'block' : 'hidden sm:flex'
+            className={`flex-1 min-h-0 flex flex-col min-w-0 ${
+              mobileTab === 'canvas' ? 'flex' : 'hidden sm:flex'
             }`}
           >
             <MainCanvas
               canvasState={canvasState}
               onNavigateCanvas={(v, taskId) =>
-                handleNavigateCanvas(v, 'user', undefined, undefined, taskId)
+                handleNavigateCanvas(v, 'user', undefined, taskId)
               }
               onPromptChat={handlePromptFromCanvas}
             />
@@ -207,21 +218,15 @@ export default function App() {
 
           {/* Right Pane: Sidebar Chat (Pure Messages & Conversational Input) */}
           <div
-            className={`w-full sm:w-[380px] lg:w-[420px] flex flex-col shrink-0 ${
-              mobileTab === 'chat' ? 'block' : 'hidden sm:flex'
+            className={`w-full sm:w-[380px] lg:w-[420px] min-h-0 flex flex-col shrink-0 ${
+              mobileTab === 'chat' ? 'flex' : 'hidden sm:flex'
             }`}
           >
             <ChatPanel
               externalPrompt={chatPrompt}
               onClearExternalPrompt={() => setChatPrompt(undefined)}
-              onCanvasChange={(v, prefill, surface, taskId) =>
-                handleNavigateCanvas(
-                  v,
-                  'agent',
-                  prefill,
-                  surface,
-                  taskId || (surface?.dataModel?.selectedTaskId as string)
-                )
+              onCanvasChange={(v, prefill, taskId) =>
+                handleNavigateCanvas(v, 'agent', prefill, taskId)
               }
               currentCanvasView={canvasState.view}
             />
@@ -234,6 +239,5 @@ export default function App() {
           onClose={() => setShowDesktopModal(false)}
         />
       </div>
-    </A2UIProvider>
   );
 }

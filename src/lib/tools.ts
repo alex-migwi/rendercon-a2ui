@@ -4,7 +4,7 @@ export interface ToolProperty {
   type: string;
   description: string;
   enum?: string[];
-  items?: { type: string };
+  items?: { type: string; description?: string };
 }
 
 export interface CanonicalToolDefinition {
@@ -25,7 +25,7 @@ export const TASKFLOW_TOOLS: CanonicalToolDefinition[] = [
   {
     name: 'draft_task_form',
     description:
-      'Declarative WebMCP & A2UI tool to mount and autofill the Create Task Form surface on the canvas with structured details extracted from user instructions, enabling human-in-the-loop validation and editing before saving.',
+      'WebMCP tool to mount and autofill the built-in Create Task Form view on the canvas with structured details extracted from user instructions, enabling human-in-the-loop validation and editing before saving.',
     parameters: {
       type: 'object',
       properties: {
@@ -50,14 +50,14 @@ export const TASKFLOW_TOOLS: CanonicalToolDefinition[] = [
   {
     name: 'show_canvas_surface',
     description:
-      'A2UI Navigation tool to switch the active workspace canvas to a validated A2UI surface: "kanban" (all tasks), "summary" (completion analytics and metrics), "focus" (urgent/high priority deep work), or "inspector" (live WebMCP protocol telemetry).',
+      'Canvas navigation tool to switch the active workspace canvas to a built-in first-party view: "kanban" (all tasks), "summary" (completion analytics and metrics), "focus" (urgent/high priority deep work), or "inspector" (live WebMCP protocol telemetry). These are hand-authored React surfaces, not agent-composed A2UI trees; use render_a2ui_surface for custom A2UI views.',
     parameters: {
       type: 'object',
       properties: {
         surface: {
           type: 'string',
           enum: ['kanban', 'summary', 'focus', 'inspector', 'detail'],
-          description: 'The target A2UI surface to render on the main canvas',
+          description: 'The target built-in canvas view to render on the main canvas',
         },
         focusCategory: {
           type: 'string',
@@ -193,6 +193,43 @@ export const TASKFLOW_TOOLS: CanonicalToolDefinition[] = [
       },
     },
   },
+  {
+    name: 'render_a2ui_surface',
+    description:
+      'Compose and render a declarative A2UI v0.9 component tree on the main canvas. ' +
+      'The tree is validated against the official A2UI basic catalog (component names, props, and child references) before rendering; invalid trees are rejected with per-node errors you can correct. ' +
+      'Use this when the user asks for a custom view, report, dashboard, matrix, or summary that is not one of the built-in views. ' +
+      'The tree is a FLAT array of nodes, each: { "id": string, "component": string, ...props }. Children are referenced by id, not nested. ' +
+      'The first node is the root and must be a Column. ' +
+      'Components: ' +
+      'Column { children: string[] (child ids) }, ' +
+      'Row { children: string[] }, ' +
+      'Card { child: string (single child id) }, ' +
+      'Text { text: string OR { "path": "/dataKey" } — supports Markdown }, ' +
+      'Button { child: string (Text node id for the label), action: { "event": { "name": string, "context": object } }, variant: "default"|"primary" }, ' +
+      'CheckBox { label: string, value: boolean }, ' +
+      'TextField { label: string, value: string }, ' +
+      'Divider {}, List { items: string[] }, Tabs { tabs: string[], activeTab: string }. ' +
+      'The "data" argument holds JSON values that Text props bind to via { "path": "/key" } (JSON Pointer from the surface root, e.g. data { "header": "# Report" } binds with path "/header"). ' +
+      'Buttons dispatch their action event back to you when clicked — use the most relevant tool name (e.g. complete_todo, show_canvas_surface) as the action name and include needed ids in context. ' +
+      'Example: components [{"id":"root","component":"Column","children":["card","btn"]},{"id":"card","component":"Card","child":"title"},{"id":"title","component":"Text","text":{"path":"/title"}},{"id":"btn","component":"Button","child":"btnLabel","action":{"event":{"name":"show_canvas_surface","context":{"surface":"kanban"}}}},{"id":"btnLabel","component":"Text","text":"Back to board"}], data {"title":"# My Report"}',
+    parameters: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'Short human-readable title of this surface, shown in the canvas header' },
+        components: {
+          type: 'array',
+          items: { type: 'object' },
+          description: 'Flat array of declarative A2UI component nodes; children referenced by id',
+        },
+        data: {
+          type: 'object',
+          description: 'JSON data model bound into components via { "path": "/key" } props',
+        },
+      },
+      required: ['title', 'components'],
+    },
+  },
 ];
 
 /**
@@ -200,26 +237,28 @@ export const TASKFLOW_TOOLS: CanonicalToolDefinition[] = [
  * dynamically, preventing duplicate schema declarations on the backend.
  */
 export function getGenAIFunctionDeclarations(): any[] {
+  const mapType = (t: string): any => {
+    if (t === 'boolean') return Type.BOOLEAN;
+    if (t === 'object') return Type.OBJECT;
+    if (t === 'number' || t === 'integer') return Type.NUMBER;
+    return Type.STRING;
+  };
+
   return TASKFLOW_TOOLS.map((tool) => {
     const properties: Record<string, any> = {};
 
     for (const [key, prop] of Object.entries(tool.parameters.properties)) {
-      if (prop.type === 'string') {
-        properties[key] = {
-          type: Type.STRING,
-          description: prop.description,
-          ...(prop.enum ? { enum: prop.enum } : {}),
-        };
-      } else if (prop.type === 'boolean') {
-        properties[key] = {
-          type: Type.BOOLEAN,
-          description: prop.description,
-        };
-      } else if (prop.type === 'array') {
+      if (prop.type === 'array') {
         properties[key] = {
           type: Type.ARRAY,
           description: prop.description,
-          items: { type: Type.STRING },
+          items: { type: mapType(prop.items?.type || 'string') },
+        };
+      } else {
+        properties[key] = {
+          type: mapType(prop.type),
+          description: prop.description,
+          ...(prop.enum ? { enum: prop.enum } : {}),
         };
       }
     }
@@ -237,7 +276,7 @@ export function getGenAIFunctionDeclarations(): any[] {
 }
 
 /**
- * Standard W3C WebMCP Tool Descriptors for document.modelContext.
+ * WebMCP Tool Descriptors for document.modelContext (WebMCP draft API via @mcp-b).
  */
 export const WEBMCP_TOOLS = TASKFLOW_TOOLS.map((t) => ({
   name: t.name,

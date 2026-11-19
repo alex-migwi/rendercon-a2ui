@@ -16,9 +16,9 @@ class TelemetryBus {
     this.log({
       phase: 'WEBMCP_EXEC',
       method: 'runtime/init',
-      details: 'W3C WebMCP & A2UI runtime initialized with standard document.modelContext',
+      details: 'WebMCP & A2UI runtime initialized: tools exposed on document.modelContext via the @mcp-b polyfill',
       data: {
-        standards: ['W3C Model Context Protocol (WebMCP)', 'A2UI (Agent-to-User Interface)'],
+        standards: ['Web Model Context Protocol (WebMCP, W3C CG draft)', 'A2UI (Agent-to-User Interface) v0.9'],
         target: 'window.document.modelContext',
       },
     });
